@@ -1,33 +1,43 @@
 import logo from './logo.svg';
 import './App.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import axios from 'axios';
 import QuoteCard from './components/QuoteCard';
-
-const sampleQuote = {
-  quote: "I think women and seamen don't mix",
-  character: 'Waylon Smithers',
-  image:
-    'https://cdn.glitch.com/3c3ffadc-3406-4440-bb95-d40ec8fcde72%2FWaylonSmithers.png?1497567511840',
-  characterDirection: 'Left',
-};
+import MovieCard from './components/MovieCard';
 
 function App() {
-  const [quote, setQuote] = React.useState(sampleQuote);
-  const getQuote = () => {
+  const [popularMovies, setPopularMovies] = React.useState([]);
+  const [popularMoviePage, setPopularMoviePage] = React.useState(1);
+
+  const getPopularMovie = () => {
     axios
-      .get('https://simpsons-quotes-api.herokuapp.com/quotes')
+      .get(
+        `https://api.themoviedb.org/3/movie/popular?api_key=20d0a760d82811eb01a3f02b31edc400&language=en-US&page=${popularMoviePage}`
+      )
       .then((response) => response.data)
       .then((data) => {
-        console.log(data);
-        setQuote(data[0]);
+        setPopularMovies(popularMovies.concat(data.results));
       });
   };
+
+  const handleMoreMovies = () => {
+    setPopularMoviePage(popularMoviePage + 1);
+  };
+
+  useEffect(() => {
+    getPopularMovie();
+  }, [popularMoviePage]);
+
   return (
     <div className="App">
-      <QuoteCard quote={quote} />
-      <button type="button" onClick={getQuote}>
-        Get a new quote
+      <div className="movie-container">
+        {popularMovies.map((movie) => (
+          <MovieCard key={movie.id} movie={movie} />
+        ))}
+      </div>
+
+      <button type="button" onClick={handleMoreMovies}>
+        Get more Movies
       </button>
     </div>
   );
